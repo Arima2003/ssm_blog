@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--约束文件
+    http://mybatis.org/dtd/mybatis-3-mapper.dtd
+    作用：定义和限制当前文件中可以使用的标签和属性，以及标签出现的顺序
+    mapper 根标签
+    namespace：命名空间，必须有值，不能空且唯一，推荐使用Dao接口的全限定名称
+            作用：参与识别sql语句
+    mapper里可以 写
+        <insert> 增
+        <update> 改
+        <delete> 删
+        <select> 查
+-->
+<mapper namespace="com.wanghao.ssm.Dao.UserMapper">
+
+    <select id="IsContainUser" resultType="com.wanghao.ssm.Entity.User">
+        select * from tbl_user where uname=#{userName}
+    </select>
+
+</mapper>

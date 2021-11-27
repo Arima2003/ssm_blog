@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+">
+        
+        <!--扫描业务组件-->
+        <context:component-scan base-package="com.wanghao.ssm">
+                <!--除了控制器，其他的业务逻辑组件都要扫-->
+                <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        </context:component-scan>
+        
+        <!--Spring的配置文件，这里主要配置和业务逻辑有关的信息-->
+        <!--数据源，事务控制-->
+        <context:property-placeholder location="classpath:dbconfig.properties"></context:property-placeholder>
+        <bean id="pooledDataSource" class="com.alibaba.druid.pool.DruidDataSource">
+                <property name="url" value="${jdbc.jdbcUrl}"></property>
+                <property name="driverClassName" value="${jdbc.driverClass}"></property>
+                <property name="username" value="${jdbc.user}"></property>
+                <property name="password" value="${jdbc.password}"></property>
+        </bean>
+
+        <!--配置和mybatis的整合,创建SqlSessionFactory对象-->
+        <bean id="SqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+                <!--指定mybatis全局配置文件的位置-->
+                <property name="configLocation" value="classpath:mybatis-config.xml"></property>
+                <!--指定数据源-->
+                <property name="dataSource" ref="pooledDataSource"></property>
+                <!--指定mybatis mapper文件的位置-->
+                <property name="mapperLocations" value="classpath:mapper/*.xml"></property>
+        </bean>
+
+        <!--配置一个可以执行批量操作的SqlSession-->
+        <bean id="SqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+                <constructor-arg name="sqlSessionFactory" ref="SqlSessionFactoryBean"/>
+                <constructor-arg name="executorType" value="BATCH"/>
+        </bean>
+
+        <!--配置扫描器，将Mybatis接口的实现加入到IOC容器中-->
+        <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+                <property name="basePackage" value="com.wanghao.ssm"></property>
+        </bean>
+
+        <!--事务控制-->
+        <bean id="DataSourceTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+                <!--控制住数据源-->
+                <property name="dataSource" ref="pooledDataSource"></property>
+        </bean>
+
+        <!--开启基于注解的事务，或使用xml配置的事务（主要的都是使用配置式）-->
+        <aop:config>
+                <!--切入点表达式-->
+                <aop:pointcut id="txpoint" expression="execution(* com.wanghao.ssm..*(..))"></aop:pointcut>
+                <!--配置事务增强-->
+                <aop:advisor advice-ref="txadvice" pointcut-ref="txpoint"/>
+        </aop:config>
+
+        <!--配置事务增强，事务如何切入-->
+        <tx:advice id="txadvice" transaction-manager="DataSourceTransactionManager">
+                <tx:attributes>
+                        <!--所有方法都是事务方法-->
+                        <tx:method name="*"/>
+                        <tx:method name="get*" read-only="true"/>
+                        <!-- 为什么要设置  read-only true 当事务方法为get*开头的方法时，我们默认其执行的是查询操作
+                         如果你一次执行单条查询语句，则没有必要启用事务支持，数据库默认支持SQL执行期间的读一致性；
+如果你一次执行多条查询语句，例如统计查询，报表查询，在这种场景下，多条查询SQL必须保证整体的读一致性，
+否则，在前条SQL查询之后，后条SQL查询之前，数据被其他用户改变，则该次整体的统计查询将会出现读数据不一致的状态，此时，应该启用事务支持。
+【注意是一次执行多次查询来统计某些信息，这时为了保证数据整体的一致性，要用只读事务】
+                        -->
+                </tx:attributes>
+        </tx:advice>
+
+        <!--Spring配置文件按的核心点：(数据源、与mybatis整合、事务控制)-->
+</beans>

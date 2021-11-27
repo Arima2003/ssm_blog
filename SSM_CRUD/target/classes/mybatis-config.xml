@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <package name="com.wanghao.ssm.Entity"/>
+    </typeAliases>
+
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor">
+            <!--分页合理化-->
+            <property name="reasonable" value="true"/>
+        </plugin>
+    </plugins>
+
+    <!--<environments default="development">-->
+        <!--<environment id="development">-->
+            <!--<transactionManager type="JDBC"/>-->
+            <!--&lt;!&ndash;配置数据源：创建Connection对象&ndash;&gt;-->
+            <!--<dataSource type="POOLED">-->
+                <!--<property name="driver" value="com.mysql.cj.jdbc.Driver"/>-->
+                <!--<property name="url" value="jdbc:mysql://localhost:3306/mybatis?useSSL=false&amp;serverTimezone=UTC&amp;-->
+<!--characterEncoding=utf-8"/>-->
+                <!--<property name="username" value="root"/>-->
+                <!--<property name="password" value="wh.0410"/>-->
+            <!--</dataSource>-->
+        <!--</environment>-->
+    <!--</environments>-->
+    <!--&lt;!&ndash;指定其他mapper文件的位置-->
+        <!--目的：找到其他文件中的sql语句-->
+    <!--&ndash;&gt;-->
+    <!--<mappers>-->
+        <!--&lt;!&ndash;使用mapper的resource属性指定mapper文件的路径-->
+            <!--这个路径是从target/classes路径开启的-->
+            <!--注意：resource="mapper文件的路径，使用/分割，一个mapper resource指定一个mapper文件-->
+        <!--&ndash;&gt;-->
+
+    <!--</mappers>-->
+</configuration>
